@@ -136,8 +136,9 @@ describe('SimpleScheduler', function(){
     })
     it('should approach the MAX_REQUESTS directive.', function(done){
       var WORKER_ID = "WORKER";
-      var mockWorker = 
-        addWorker(scheduler, WORKER_ID, MAX_REQUESTS - 1, 0, 0, false);
+      _.times(7, function(){addWorker(scheduler, WORKER_ID + Math.random(), MAX_REQUESTS - 1, 0, 0, false)});
+      var mockWorker =
+          addWorker(scheduler, WORKER_ID, MAX_REQUESTS - 2, 0, 0, false);
 
       //request a worker for the new app
       scheduler.acquireWorker(appSpec, '/').getAppWorkerHandle_p()
