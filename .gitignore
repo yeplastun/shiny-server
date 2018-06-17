@@ -9,3 +9,5 @@ ext/
 src/launcher.h
 .vagrant
 node_modules/
+.idea/
+tmp/
