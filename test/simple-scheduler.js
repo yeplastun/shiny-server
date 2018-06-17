@@ -78,7 +78,7 @@ describe('SimpleScheduler', function(){
     appSpec = {
       getKey: function(){return "simpleAppSpecKey"},
       settings: {appDefaults: {sessionTimeout: 10}, scheduler: 
-        {simple: {maxRequests: MAX_REQUESTS, maxWorkers: MAX_WORKERS}}}
+        {simple: {maxRequests: MAX_REQUESTS}}}
     };
 
     var key =  appSpec.getKey();
@@ -183,8 +183,9 @@ describe('SimpleScheduler', function(){
     })
     it('should not 503 non-/, non-ws traffic ever', function(done){
       var WORKER_ID = "WORKER";
+      _.times(8, function(){addWorker(scheduler, WORKER_ID + Math.random(), MAX_REQUESTS * 3, 0, 0, false)});
       var mockWorker = 
-        addWorker(scheduler, WORKER_ID, 0, 0, 0, false);
+        addWorker(scheduler, WORKER_ID, MAX_REQUESTS * 2, 0, 0, false);
 
       appSpec.settings.scheduler = {simple: {maxRequests: 0}};
 
