@@ -69,7 +69,7 @@ describe('SimpleScheduler', function(){
       return {
         getAppWorkerHandle_p: () => Q({type: "mockWorker"})
       };
-    }
+    };
 
     // Since we can't globally inject ourselves into scheduler, redefine
     // the spy before each test.
@@ -115,13 +115,16 @@ describe('SimpleScheduler', function(){
       .then(done, done).done();
 
     })
-    it('should not limit if there is no max', function(done){
+    it('should not limit if there is no max but should choose less busy one', function(done){
       var WORKER_ID = "WORKER";
+
+      _.times(7, function(){addWorker(scheduler, WORKER_ID + Math.random(), 100, 0, 0, false)});
       var mockWorker = 
-        addWorker(scheduler, WORKER_ID, 10000, 0, false);
+        addWorker(scheduler, WORKER_ID, 10, 0, false);
       
       // Reset after adding the initial worker.
-      spawnWorkerSpy.resetHistory();      
+      spawnWorkerSpy.resetHistory();
+
       appSpec.settings.scheduler = {simple: {maxRequests: 0}};
       scheduler.acquireWorker(appSpec).getAppWorkerHandle_p()
       .then(function(wh){
@@ -133,8 +136,9 @@ describe('SimpleScheduler', function(){
     })
     it('should approach the MAX_REQUESTS directive.', function(done){
       var WORKER_ID = "WORKER";
-      var mockWorker = 
-        addWorker(scheduler, WORKER_ID, MAX_REQUESTS - 1, 0, 0, false);
+      _.times(7, function(){addWorker(scheduler, WORKER_ID + Math.random(), MAX_REQUESTS - 1, 0, 0, false)});
+      var mockWorker =
+          addWorker(scheduler, WORKER_ID, MAX_REQUESTS - 2, 0, 0, false);
 
       //request a worker for the new app
       scheduler.acquireWorker(appSpec, '/').getAppWorkerHandle_p()
@@ -146,6 +150,7 @@ describe('SimpleScheduler', function(){
     })
     it('should not let an http connection use a pending conn count.', function() {
       var WORKER_ID = "WORKER";
+      _.times(7, function(){addWorker(scheduler, WORKER_ID + Math.random(), MAX_REQUESTS, 0, 0, false)});
       var mockWorker = 
         addWorker(scheduler, WORKER_ID, MAX_REQUESTS - 1, 0, 1, false);
 
@@ -156,8 +161,9 @@ describe('SimpleScheduler', function(){
     })
     it('should let a sockjs connection use a pending conn count.', function(done){
       var WORKER_ID = "WORKER";
-      var mockWorker = 
-        addWorker(scheduler, WORKER_ID, MAX_REQUESTS - 1, 0, 1, false);
+      _.times(7, function(){addWorker(scheduler, WORKER_ID + Math.random(), MAX_REQUESTS, 0, 0, false)});
+      var mockWorker =
+          addWorker(scheduler, WORKER_ID, MAX_REQUESTS-1, 0, 1, false);
 
       //request a worker for the new app
       scheduler.acquireWorker(appSpec, 'ws').getAppWorkerHandle_p()
@@ -169,8 +175,7 @@ describe('SimpleScheduler', function(){
     })
     it('should not exceed the MAX_REQUESTS directive on the base URL.', function(){
       var WORKER_ID = "WORKER";
-      var mockWorker = 
-        addWorker(scheduler, WORKER_ID, MAX_REQUESTS, 0, 0, false);
+      _.times(8, function(){addWorker(scheduler, WORKER_ID + Math.random(), MAX_REQUESTS, 0, 0, false)});
 
       //request a worker for the new app
       (function(){
@@ -179,8 +184,9 @@ describe('SimpleScheduler', function(){
     })
     it('should not 503 non-/, non-ws traffic ever', function(done){
       var WORKER_ID = "WORKER";
+      _.times(8, function(){addWorker(scheduler, WORKER_ID + Math.random(), MAX_REQUESTS * 3, 0, 0, false)});
       var mockWorker = 
-        addWorker(scheduler, WORKER_ID, MAX_REQUESTS*2, 0, 0, false);
+        addWorker(scheduler, WORKER_ID, MAX_REQUESTS * 2, 0, 0, false);
 
       appSpec.settings.scheduler = {simple: {maxRequests: 0}};
 
